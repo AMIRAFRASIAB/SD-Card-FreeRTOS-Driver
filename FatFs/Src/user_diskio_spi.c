@@ -24,9 +24,9 @@
 
 //It is designed to be wrapped by a cubemx generated user_diskio.c file.
 
-#include "stm32f4xx_hal.h" /* Provide the low-level HAL functions */
+
 #include "user_diskio_spi.h"
-#include "stm32f4xx_ll_gpio.h"
+#include "stm32f1xx_ll_gpio.h"
 #include "spi_rtos_driver.h"
 #include "sd_card_config.h"
 #include "FreeRTOS.h"

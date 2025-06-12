@@ -1,17 +1,18 @@
 
-#include "fn_map.h"
+
 #include "sd_card.h"
 #include "spi_rtos_driver.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
 #include "timers.h"
-#include "fatfs.h"
 #include "sd_card_config.h"
 #include "limits.h"
 #include "string.h"
 #include "ctype.h"
-
+#include "ff.h"
+#include "diskio.h"
+#include "ff_gen_drv.h"
 
 #if SD_CARD_LOGGER_ENABLE != NO
   #include "serial_debugger.h"
@@ -26,7 +27,7 @@
 /*------------------------------------------------------------*/
 /* Private Objects */
 /*------------------------------------------------------------*/
-static uint8_t txBuf[2][512];
+static uint8_t txBuf[2][SD_CARD_TX_BUFFER_LEN];
 static char fileName[16] = "Log.txt";
 static uint16_t index[2];
 static bool bufferReady[2] = {false, false};
@@ -276,7 +277,7 @@ bool sd_init (void) {
   bool status = true;
   LOG_TRACE("SD :: Initializing...");
   status = status && SRD_Driver_Init();
-  status = status && xTaskCreate(&serviceSD, "SD Card", SD_CARD_STACK_SIZE, NULL, SD_CARD_TASK_PRIORITY, &hTaskSD) == pdTRUE;
+  status = status && xTaskCreate(&serviceSD, "SD Card", SD_CARD_STACK_SIZE / 4, NULL, SD_CARD_TASK_PRIORITY, &hTaskSD) == pdTRUE;
   status = status && (hMutex = xSemaphoreCreateMutex()) != NULL;
   status = status && (hTim = xTimerCreate("SD_Sync_Tim", SD_CARD_SYNCH_TIME_MS, pdTRUE, NULL, &__sd_synchTimCallback)) != NULL;
   status = status && (xTimerStart(hTim, portMAX_DELAY) == pdTRUE);
